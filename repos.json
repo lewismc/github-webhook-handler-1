@@ -1,0 +1,17 @@
+{
+    "darth-pr/celgene": {
+        "path": "/usr/local/celgene/build",
+        "key": "celgene_hook",
+        "action": [["git", "pull", "origin", "master"], ],
+    },
+    "darth-pr/shangrila": {
+        "path": "/usr/local/celgene/build",
+        "key": "celgene_hook",
+        "action": [["git", "pull", "origin", "master"], ],
+    },
+    "renato2099/dia-kafka-solr": {
+        "path": "/usr/local/celgene/build",
+        "key": "celgene_hook",
+        "action": [["git", "pull", "origin", "master"], ],
+    }
+}
