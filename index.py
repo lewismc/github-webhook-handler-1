@@ -9,6 +9,9 @@ import requests
 import ipaddress
 import hmac
 from hashlib import sha1
+import logging
+from logging.handlers import RotatingFileHandler 
+from logging import Formatter
 from flask import Flask, request, abort
 
 """
@@ -37,6 +40,7 @@ REPOS_JSON_PATH = os.getenv('FLASK_GITHUB_WEBHOOK_REPOS_JSON', '/usr/local/githu
 @app.route("/", methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
+        app.logger.info('GET Method successful.')
         return 'OK'
     elif request.method == 'POST':
         # Store the IP address of the requester
@@ -53,8 +57,10 @@ def index():
         # Check if the POST request is from github.com or GHE
         for block in hook_blocks:
             if ipaddress.ip_address(request_ip) in ipaddress.ip_network(block):
+                app.logger.info('The remote address is within the network range of Github.')
                 break  # the remote_addr is within the network range of github.
         else:
+            app.logger.error('Encountered a 403 HTTP Code!')
             abort(403)
 
         if request.headers.get('X-GitHub-Event') == "ping":
@@ -130,4 +136,11 @@ if __name__ == "__main__":
         port_number = 80
     if os.environ.get('USE_PROXYFIX', None) == 'true':
         app.wsgi_app = ProxyFix(app.wsgi_app)
+    handler = RotatingFileHandler('github-webhook-handler.log', maxBytes=10000, backupCount=1)
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(Formatter(
+        '%(asctime)s %(levelname)s: %(message)s '
+        '[in %(pathname)s:%(lineno)d]'
+    ))
+    app.logger.addHandler(handler) 
     app.run(host='0.0.0.0', port=port_number)
